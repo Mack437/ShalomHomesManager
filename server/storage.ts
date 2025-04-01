@@ -355,4 +355,115 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Create a proxy storage that delegates to the current implementation
+class StorageProxy implements IStorage {
+  private _implementationInstance: IStorage = new MemStorage();
+
+  set implementationInstance(implementation: IStorage) {
+    this._implementationInstance = implementation;
+  }
+
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    return this._implementationInstance.getUser(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return this._implementationInstance.getUserByUsername(username);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return this._implementationInstance.getUserByEmail(email);
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    return this._implementationInstance.getUserByGoogleId(googleId);
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    return this._implementationInstance.createUser(user);
+  }
+
+  async getUsers(): Promise<User[]> {
+    return this._implementationInstance.getUsers();
+  }
+
+  // Property methods
+  async getProperty(id: number): Promise<Property | undefined> {
+    return this._implementationInstance.getProperty(id);
+  }
+
+  async getProperties(): Promise<Property[]> {
+    return this._implementationInstance.getProperties();
+  }
+
+  async createProperty(property: InsertProperty): Promise<Property> {
+    return this._implementationInstance.createProperty(property);
+  }
+
+  // Apartment methods
+  async getApartment(id: number): Promise<Apartment | undefined> {
+    return this._implementationInstance.getApartment(id);
+  }
+
+  async getApartmentsByProperty(propertyId: number): Promise<Apartment[]> {
+    return this._implementationInstance.getApartmentsByProperty(propertyId);
+  }
+
+  async createApartment(apartment: InsertApartment): Promise<Apartment> {
+    return this._implementationInstance.createApartment(apartment);
+  }
+
+  // Task methods
+  async getTask(id: number): Promise<Task | undefined> {
+    return this._implementationInstance.getTask(id);
+  }
+
+  async getTasks(): Promise<Task[]> {
+    return this._implementationInstance.getTasks();
+  }
+
+  async getTasksByProperty(propertyId: number): Promise<Task[]> {
+    return this._implementationInstance.getTasksByProperty(propertyId);
+  }
+
+  async getTasksByAssignee(userId: number): Promise<Task[]> {
+    return this._implementationInstance.getTasksByAssignee(userId);
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    return this._implementationInstance.createTask(task);
+  }
+
+  async updateTaskStatus(id: number, status: string): Promise<Task | undefined> {
+    return this._implementationInstance.updateTaskStatus(id, status);
+  }
+
+  // Transaction methods
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    return this._implementationInstance.getTransaction(id);
+  }
+
+  async getTransactions(): Promise<Transaction[]> {
+    return this._implementationInstance.getTransactions();
+  }
+
+  async getTransactionsByTenant(tenantId: number): Promise<Transaction[]> {
+    return this._implementationInstance.getTransactionsByTenant(tenantId);
+  }
+
+  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    return this._implementationInstance.createTransaction(transaction);
+  }
+
+  // Activity methods
+  async getActivities(limit?: number): Promise<Activity[]> {
+    return this._implementationInstance.getActivities(limit);
+  }
+
+  async createActivity(activity: InsertActivity): Promise<Activity> {
+    return this._implementationInstance.createActivity(activity);
+  }
+}
+
+export const storage = new StorageProxy();

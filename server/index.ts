@@ -1,6 +1,38 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { DbStorage } from "./db-storage";
+import { storage } from "./storage";
+import { env } from "./config";
+
+// Initialize the storage with database implementation
+const dbStorage = new DbStorage();
+
+// Import migration code
+import fs from 'fs';
+import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+
+// Run migrations and seed data
+(async () => {
+  try {
+    // Run the migrate.ts file to set up database schema
+    await execAsync('tsx server/migrate.ts');
+    log("Migration completed successfully");
+    
+    // Initialize database with seed data
+    await dbStorage.init();
+    log("Database initialized successfully");
+  } catch (error) {
+    console.error("Error setting up database:", error);
+  }
+})();
+
+// Replace the storage implementation
+(storage as any).implementationInstance = dbStorage;
 
 const app = express();
 app.use(express.json());
