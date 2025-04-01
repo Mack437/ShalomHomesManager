@@ -6,6 +6,7 @@ import {
   transactions, type Transaction, type InsertTransaction,
   activities, type Activity, type InsertActivity
 } from "@shared/schema";
+import * as bcrypt from 'bcryptjs';
 
 // Storage interface
 export interface IStorage {
@@ -204,8 +205,15 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentIds.user++;
     const now = new Date();
+    
+    // Hash password if it exists
+    let userWithHashedPassword = {...insertUser};
+    if (userWithHashedPassword.password) {
+      userWithHashedPassword.password = await bcrypt.hash(userWithHashedPassword.password, 10);
+    }
+    
     const user: User = { 
-      ...insertUser, 
+      ...userWithHashedPassword, 
       id, 
       createdAt: now 
     };
