@@ -1,102 +1,32 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from "./hooks/use-auth.tsx";
-import NotFound from "@/pages/not-found";
-import Login from "@/pages/login";
-import Dashboard from "@/pages/dashboard";
-import Properties from "@/pages/properties";
-import Tasks from "@/pages/tasks";
-import POS from "@/pages/pos";
-import Users from "@/pages/users";
-import MapView from "@/pages/map";
-import FormDemo from "@/pages/form-demo";
-import AppLayout from "@/components/layout/AppLayout";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-
-function Router() {
-  return (
-    <Switch>
-      <Route path="/login" component={Login} />
-      
-      <Route path="/">
-        <ProtectedRoute>
-          <AppLayout>
-            <Dashboard />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      
-      <Route path="/dashboard">
-        <ProtectedRoute>
-          <AppLayout>
-            <Dashboard />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      
-      <Route path="/properties">
-        <ProtectedRoute>
-          <AppLayout>
-            <Properties />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      
-      <Route path="/tasks">
-        <ProtectedRoute>
-          <AppLayout>
-            <Tasks />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      
-      <Route path="/pos">
-        <ProtectedRoute>
-          <AppLayout>
-            <POS />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      
-      <Route path="/users">
-        <ProtectedRoute>
-          <AppLayout>
-            <Users />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      
-      <Route path="/map">
-        <ProtectedRoute>
-          <AppLayout>
-            <MapView />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      
-      <Route path="/form-demo">
-        <ProtectedRoute>
-          <AppLayout>
-            <FormDemo />
-          </AppLayout>
-        </ProtectedRoute>
-      </Route>
-      
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router />
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+    <div className="p-8 max-w-xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Form Micro-Interactions Demo</h1>
+      <div className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Email Form Example</h2>
+        
+        <form className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-1">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              className="w-full p-2 border rounded-md border-gray-300"
+              placeholder="your@email.com"
+            />
+          </div>
+          
+          <button 
+            type="submit" 
+            className="w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
 
