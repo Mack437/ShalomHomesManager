@@ -11,3 +11,51 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* Form validation micro-interactions */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideDown {
+  0% { transform: translateY(-10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.input-error {
+  animation: shake 0.5s ease-in-out;
+  @apply border-red-500 bg-red-50;
+}
+
+.input-success {
+  @apply border-green-500 bg-green-50;
+  animation: popIn 0.3s ease-in-out;
+}
+
+.input-checking {
+  @apply border-yellow-400;
+  animation: pulse 1.5s infinite;
+}
+
+.error-message {
+  @apply mt-1 text-sm text-red-600;
+  animation: slideDown 0.3s ease-out;
+}
+
+.feedback-icon {
+  @apply absolute right-10 top-1/2 transform -translate-y-1/2;
+  animation: popIn 0.3s ease-out;
+}
