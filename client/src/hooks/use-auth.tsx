@@ -10,6 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithUsername: (username: string, password: string) => Promise<void>;
   googleLogin: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   isAuthenticated: false,
   login: async () => {},
+  loginWithUsername: async () => {},
   googleLogin: async () => {},
   logout: async () => {},
 });
@@ -43,10 +45,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  // Login mutation
+  // Email Login mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
       const res = await apiRequest("POST", "/api/auth/login", credentials);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setUser(data.user);
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${data.user.name}!`,
+      });
+      setLocation("/dashboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Username Login mutation
+  const usernameLoginMutation = useMutation({
+    mutationFn: async (credentials: { username: string; password: string }) => {
+      const res = await apiRequest("POST", "/api/auth/login/username", credentials);
       return res.json();
     },
     onSuccess: (data) => {
@@ -92,6 +117,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     await loginMutation.mutateAsync({ email, password });
   };
+  
+  const loginWithUsername = async (username: string, password: string) => {
+    await usernameLoginMutation.mutateAsync({ username, password });
+  };
 
   const googleLogin = async () => {
     // This would normally redirect to Google OAuth flow
@@ -111,6 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     isAuthenticated: !!user,
     login,
+    loginWithUsername,
     googleLogin,
     logout
   };
