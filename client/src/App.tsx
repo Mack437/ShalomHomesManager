@@ -11,6 +11,7 @@ import Tasks from "@/pages/tasks";
 import POS from "@/pages/pos";
 import Users from "@/pages/users";
 import MapView from "@/pages/map";
+import FormDemo from "@/pages/form-demo";
 import AppLayout from "@/components/layout/AppLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
@@ -71,6 +72,14 @@ function Router() {
         <ProtectedRoute>
           <AppLayout>
             <MapView />
+          </AppLayout>
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/form-demo">
+        <ProtectedRoute>
+          <AppLayout>
+            <FormDemo />
           </AppLayout>
         </ProtectedRoute>
       </Route>

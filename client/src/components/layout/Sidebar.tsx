@@ -8,7 +8,8 @@ import {
   CreditCard, 
   Users, 
   MapPin, 
-  LogOut
+  LogOut,
+  FormInput
 } from "lucide-react";
 
 export function Sidebar() {
@@ -22,6 +23,7 @@ export function Sidebar() {
     { href: "/pos", label: "POS System", icon: <CreditCard className="mr-3 text-gray-300" size={20} /> },
     { href: "/users", label: "Users", icon: <Users className="mr-3 text-gray-300" size={20} /> },
     { href: "/map", label: "Map View", icon: <MapPin className="mr-3 text-gray-300" size={20} /> },
+    { href: "/form-demo", label: "Form Demo", icon: <FormInput className="mr-3 text-gray-300" size={20} /> },
   ];
 
   const isActive = (path: string) => {

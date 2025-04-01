@@ -15,6 +15,7 @@ export function MobileNav({ isOpen, closeMenu }: MobileNavProps) {
     { href: "/pos", label: "POS System" },
     { href: "/users", label: "Users" },
     { href: "/map", label: "Map View" },
+    { href: "/form-demo", label: "Form Demo" },
   ];
 
   const isActive = (path: string) => {
