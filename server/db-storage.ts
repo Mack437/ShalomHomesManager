@@ -5,16 +5,25 @@ import {
   type InsertUser, type InsertProperty, type InsertApartment, type InsertTask, type InsertTransaction, type InsertActivity
 } from '@shared/schema';
 import { IStorage } from './storage';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { log } from './vite';
 import * as bcrypt from 'bcryptjs';
 
 export class DbStorage implements IStorage {
   async init() {
-    // Check if we need to seed data
-    const userCount = await db.select({ count: db.fn.count() }).from(users);
-    
-    if (parseInt(userCount[0].count as string) === 0) {
+    try {
+      // Check if we need to seed data
+      const result = await db.execute(sql`SELECT COUNT(*) FROM users`);
+      const userCount = parseInt(result.rows[0].count || '0');
+      
+      log(`Current user count: ${userCount}`);
+      
+      if (userCount === 0) {
+        await this.seedDatabase();
+      }
+    } catch (error) {
+      // If the table doesn't exist yet, seed data
+      log(`Error checking users table: ${error}`);
       await this.seedDatabase();
     }
   }

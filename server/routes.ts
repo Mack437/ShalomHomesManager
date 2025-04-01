@@ -17,6 +17,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { z } from "zod";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import * as bcrypt from 'bcryptjs';
 
 const MemoryStoreSession = MemoryStore(session);
 
@@ -40,7 +41,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Configure passport local strategy
+  // Use bcrypt for password comparison
+
+  // Configure passport local strategy for email-based login
   passport.use(
     new LocalStrategy(
       {
@@ -51,16 +54,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const user = await storage.getUserByEmail(email);
           if (!user) {
-            return done(null, false, { message: "Invalid email" });
+            console.log(`Login attempt failed: No user found with email ${email}`);
+            return done(null, false, { message: "Invalid email or password" });
           }
 
-          // In a real app, we would compare hashed passwords
-          if (user.password !== password) {
-            return done(null, false, { message: "Invalid password" });
+          // Compare password with bcrypt
+          const isMatch = await bcrypt.compare(password, user.password || '');
+          if (!isMatch) {
+            console.log(`Login attempt failed: Invalid password for user ${email}`);
+            return done(null, false, { message: "Invalid email or password" });
           }
 
+          console.log(`User successfully authenticated: ${user.email}`);
           return done(null, user);
         } catch (error) {
+          console.error(`Login error: ${error}`);
+          return done(error);
+        }
+      }
+    )
+  );
+  
+  // Configure passport local strategy for username-based login
+  passport.use('username', 
+    new LocalStrategy(
+      {
+        usernameField: "username",
+        passwordField: "password",
+      },
+      async (username, password, done) => {
+        try {
+          const user = await storage.getUserByUsername(username);
+          if (!user) {
+            console.log(`Login attempt failed: No user found with username ${username}`);
+            return done(null, false, { message: "Invalid username or password" });
+          }
+
+          // Compare password with bcrypt
+          const isMatch = await bcrypt.compare(password, user.password || '');
+          if (!isMatch) {
+            console.log(`Login attempt failed: Invalid password for user ${username}`);
+            return done(null, false, { message: "Invalid username or password" });
+          }
+
+          console.log(`User successfully authenticated: ${user.username}`);
+          return done(null, user);
+        } catch (error) {
+          console.error(`Login error: ${error}`);
           return done(error);
         }
       }
@@ -129,6 +169,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     "/api/auth/login",
     passport.authenticate("local"),
+    (req: Request, res: Response) => {
+      res.json({ user: req.user });
+    }
+  );
+  
+  // Username-based login
+  app.post(
+    "/api/auth/login/username",
+    passport.authenticate("username"),
     (req: Request, res: Response) => {
       res.json({ user: req.user });
     }
