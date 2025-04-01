@@ -60,8 +60,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return done(null, false, { message: "Invalid email or password" });
           }
 
-          // Compare password with bcrypt
-          const isMatch = await bcrypt.compare(password, user.password || '');
+          // Try comparing with bcrypt first, if that fails, try direct comparison
+          // This handles both hashed and plain text passwords during transition
+          let isMatch = false;
+          try {
+            isMatch = await bcrypt.compare(password, user.password || '');
+          } catch (e) {
+            console.log("Error comparing with bcrypt, trying direct comparison");
+            // If bcrypt comparison fails, check if plain text passwords match
+            isMatch = password === user.password;
+          }
+          
           if (!isMatch) {
             console.log(`Login attempt failed: Invalid password for user ${email}`);
             return done(null, false, { message: "Invalid email or password" });
@@ -92,8 +101,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return done(null, false, { message: "Invalid username or password" });
           }
 
-          // Compare password with bcrypt
-          const isMatch = await bcrypt.compare(password, user.password || '');
+          // Try comparing with bcrypt first, if that fails, try direct comparison
+          // This handles both hashed and plain text passwords during transition
+          let isMatch = false;
+          try {
+            isMatch = await bcrypt.compare(password, user.password || '');
+          } catch (e) {
+            console.log("Error comparing with bcrypt, trying direct comparison");
+            // If bcrypt comparison fails, check if plain text passwords match
+            isMatch = password === user.password;
+          }
+          
           if (!isMatch) {
             console.log(`Login attempt failed: Invalid password for user ${username}`);
             return done(null, false, { message: "Invalid username or password" });
