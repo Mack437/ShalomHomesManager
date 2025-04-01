@@ -78,7 +78,7 @@ export class MemStorage implements IStorage {
       activity: 1
     };
     
-    // Add default admin user
+    // Add default admin users
     this.createUser({
       username: "admin",
       password: "admin123",
@@ -86,6 +86,17 @@ export class MemStorage implements IStorage {
       name: "Admin",
       role: "owner",
       phone: "+1234567890",
+      googleId: null
+    });
+
+    // Add new admin user with custom credentials
+    this.createUser({
+      username: "admin",
+      password: "Family1400",
+      email: "admin@example.com",
+      name: "Admin User",
+      role: "owner",
+      phone: "+9876543210",
       googleId: null
     });
     
