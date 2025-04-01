@@ -494,6 +494,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+  
+  // AI Task priority suggestion endpoint
+  app.post(
+    "/api/tasks/suggest-priority",
+    async (req: Request, res: Response) => {
+      try {
+        const { description } = req.body;
+        
+        if (!description) {
+          return res.status(400).json({ message: "Description is required" });
+        }
+        
+        // Import the AIService
+        const { AIService } = await import('./services/ai-service');
+        
+        // Get priority suggestion and confidence
+        const priority = AIService.suggestPriority(description);
+        const confidence = AIService.getPriorityConfidence(description);
+        
+        res.json({ 
+          priority, 
+          confidence,
+          message: `AI suggests ${priority} priority with ${Math.round(confidence * 100)}% confidence`
+        });
+      } catch (error) {
+        console.error("Error in priority suggestion:", error);
+        res.status(500).json({ message: "Error suggesting priority" });
+      }
+    }
+  );
 
   app.get(
     "/api/tasks",

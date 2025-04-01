@@ -2,6 +2,9 @@ import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision } f
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Define custom types
+export type TaskPriority = 'low' | 'medium' | 'high';
+
 // User model and schema
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
