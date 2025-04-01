@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth.tsx";
 import { FaGoogle } from "react-icons/fa";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 // Email login schema
 const emailLoginSchema = z.object({
@@ -31,6 +32,8 @@ export function LoginForm() {
   const { login, loginWithUsername, googleLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("email");
+  const [showEmailPassword, setShowEmailPassword] = useState(false);
+  const [showUsernamePassword, setShowUsernamePassword] = useState(false);
 
   // Email form
   const emailForm = useForm<EmailLoginFormValues>({
@@ -135,14 +138,25 @@ export function LoginForm() {
                 <Label htmlFor="password-email" className="block text-sm font-medium text-gray-700">
                   Password
                 </Label>
-                <div className="mt-1">
+                <div className="mt-1 relative">
                   <Input
                     id="password-email"
                     {...emailForm.register("password")}
-                    type="password"
+                    type={showEmailPassword ? "text" : "password"}
                     autoComplete="current-password"
                     className={emailForm.formState.errors.password ? "border-red-500" : ""}
                   />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                    onClick={() => setShowEmailPassword(!showEmailPassword)}
+                  >
+                    {showEmailPassword ? (
+                      <EyeOffIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </button>
                   {emailForm.formState.errors.password && (
                     <p className="mt-1 text-sm text-red-600">{emailForm.formState.errors.password.message}</p>
                   )}
@@ -203,14 +217,25 @@ export function LoginForm() {
                 <Label htmlFor="password-username" className="block text-sm font-medium text-gray-700">
                   Password
                 </Label>
-                <div className="mt-1">
+                <div className="mt-1 relative">
                   <Input
                     id="password-username"
                     {...usernameForm.register("password")}
-                    type="password"
+                    type={showUsernamePassword ? "text" : "password"}
                     autoComplete="current-password"
                     className={usernameForm.formState.errors.password ? "border-red-500" : ""}
                   />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                    onClick={() => setShowUsernamePassword(!showUsernamePassword)}
+                  >
+                    {showUsernamePassword ? (
+                      <EyeOffIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </button>
                   {usernameForm.formState.errors.password && (
                     <p className="mt-1 text-sm text-red-600">{usernameForm.formState.errors.password.message}</p>
                   )}
