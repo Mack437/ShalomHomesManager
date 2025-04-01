@@ -123,12 +123,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const googleLogin = async () => {
-    // This would normally redirect to Google OAuth flow
-    // For now, we'll just show a toast message
-    toast({
-      title: "Google Login",
-      description: "Google login would be implemented here",
-    });
+    // Redirect to the Google OAuth flow
+    window.location.href = '/api/auth/google';
   };
 
   const logout = async () => {

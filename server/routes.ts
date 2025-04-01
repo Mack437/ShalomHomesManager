@@ -14,10 +14,12 @@ import session from "express-session";
 import MemoryStore from "memorystore";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { z } from "zod";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import * as bcrypt from 'bcryptjs';
+import { env } from "./config";
 
 const MemoryStoreSession = MemoryStore(session);
 
@@ -107,6 +109,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     )
   );
 
+  // Configure Google OAuth Strategy
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: env.GOOGLE_CLIENT_ID,
+        clientSecret: env.GOOGLE_CLIENT_SECRET,
+        callbackURL: env.GOOGLE_CALLBACK_URL,
+        scope: ['profile', 'email']
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          // Check if user already exists with this Google ID
+          let user = await storage.getUserByGoogleId(profile.id);
+          
+          if (user) {
+            return done(null, user);
+          }
+          
+          // If user doesn't exist but has an email, check if the email is already in use
+          const email = profile.emails && profile.emails[0] ? profile.emails[0].value : '';
+          if (email) {
+            const existingUserByEmail = await storage.getUserByEmail(email);
+            if (existingUserByEmail) {
+              // Update the existing user with Google ID
+              // Note: In a production app, you might want to implement a proper linking flow
+              // This is a simplified version
+              console.log(`User with email ${email} already exists. Linking with Google account.`);
+              // This would require updating the existing user, which isn't in our current storage interface
+              // For now, we'll just return the existing user
+              return done(null, existingUserByEmail);
+            }
+          }
+          
+          // Create a new user with Google data
+          if (email && profile.displayName) {
+            // Generate a random username based on display name
+            const baseUsername = profile.displayName.toLowerCase().replace(/\s+/g, '');
+            let username = baseUsername;
+            let counter = 1;
+            
+            // Check if username exists and generate a unique one
+            while (await storage.getUserByUsername(username)) {
+              username = `${baseUsername}${counter}`;
+              counter++;
+            }
+            
+            // Create new user
+            const newUser = await storage.createUser({
+              email,
+              name: profile.displayName,
+              username,
+              googleId: profile.id,
+              // No password for Google users
+              password: null,
+              role: 'client' // Default role
+            });
+            
+            console.log(`Created new user from Google: ${newUser.email}`);
+            return done(null, newUser);
+          }
+          
+          // If we don't have email, we can't create a user
+          return done(null, false, { message: 'Could not retrieve email from Google' });
+        } catch (error) {
+          console.error("Google auth error:", error);
+          return done(error as Error);
+        }
+      }
+    )
+  );
+  
   // Serialize user to session
   passport.serializeUser((user: any, done) => {
     done(null, user.id);
@@ -196,6 +269,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     res.json({ user: req.user });
   });
+  
+  // Google Auth Routes
+  app.get(
+    "/api/auth/google",
+    passport.authenticate("google", { scope: ["profile", "email"] })
+  );
+  
+  app.get(
+    "/api/auth/google/callback",
+    passport.authenticate("google", { 
+      failureRedirect: "/login",
+      session: true
+    }),
+    (req: Request, res: Response) => {
+      // Successful authentication, redirect to dashboard or home
+      res.redirect("/dashboard");
+    }
+  );
 
   // User Routes
   app.post(
