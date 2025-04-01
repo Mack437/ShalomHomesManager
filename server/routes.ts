@@ -321,11 +321,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (existingUserUsername) {
           return res.status(400).json({ message: "Username already in use" });
         }
+        
+        // Hash the password before saving
+        if (req.body.password) {
+          req.body.password = await bcrypt.hash(req.body.password, 10);
+        }
 
         const user = await storage.createUser(req.body);
         res.status(201).json(user);
       } catch (error) {
         res.status(500).json({ message: "Error creating user" });
+      }
+    }
+  );
+  
+  // Simple route to create a test user (temporary)
+  app.get(
+    "/api/create-test-user",
+    async (req: Request, res: Response) => {
+      try {
+        // Create a simple test user with plain password
+        const hashedPassword = await bcrypt.hash('test123', 10);
+        const user = await storage.createUser({
+          username: 'testuser',
+          password: hashedPassword,
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'owner',
+          phone: null,
+          googleId: null
+        });
+        res.json({ message: "Test user created", credentials: "testuser/test123" });
+      } catch (error) {
+        console.error("Error creating test user:", error);
+        res.status(500).json({ message: "Error creating test user" });
       }
     }
   );
